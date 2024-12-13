@@ -1,37 +1,48 @@
+const http = require('http')
 const express = require('express');
+const app = express();
 const cors = require('cors');
 const mongoose = require('mongoose');
-const Users = require("./Routers/routes");
-const app = express();
-const port = 1257;
-
+const user = require('./Routes/Routes');
+const { Server } = require('socket.io')
+const server = http.createServer(app);
+app.use(cors()) 
 app.use(express.json());
-app.use(cors());
 
-app.use("/userData", Users);
+app.use('/', user)
+mongoose.connect('mongodb://localhost:27017/chat_data').then(() => {
+    console.log('database connection established')
+})
 
-mongoose.connect('mongodb://localhost:27017/chat_data')
-  .then(() => {
-    console.log('Database connected successfully');
-  })
-  .catch((error) => {
-    console.error('Database connection failed:', error);
+const io = require('socket.io')(server, {
+    cors: {
+      origin: "http://localhost:3000",  // Frontend origin
+      methods: ["GET", "POST", "PUT", "DELETE"]
+    }
   });
+  
+let connectedClients = {};
 
 io.on('connection', (socket) => {
-  console.log('A user connected:', socket.id);
+    console.log('A user connected:', socket.id);
 
-  // Handle incoming messages and broadcast them globally
-  socket.on('sendMessage', (message) => {
-    console.log('Message received:', message);
-    io.emit('receiveMessage', message); // Broadcast to all clients
-  });
+    socket.on('join-room', (code) => {
+        connectedClients[code] = socket.id;
+        console.log(`Client joined room with code: ${code}`);
+    });
 
-  socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
-  });
+    socket.on('confirm-connection', (code) => {
+        const clientSocketId = connectedClients[code];
+        if (clientSocketId) {
+            io.to(clientSocketId).emit('connected', { status: 'Connected' });
+        }
+    });
+
+    socket.on('disconnect', () => {
+        console.log('A user disconnected:', socket.id);
+    });
 });
 
-app.listen(port, () => {
-  console.log('Server listening on port ' + port);
+server.listen(1257, () => {
+    console.log('Server is running on http://localhost:1257');
 });

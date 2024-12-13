@@ -1,5 +1,6 @@
 const QrCode = require('qrcode')
 const Connection = require('../../Modules/Modules')
+
 const GetQrCode = async (req, res) => {
   try {
 
