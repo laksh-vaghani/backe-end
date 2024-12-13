@@ -16,7 +16,7 @@ mongoose.connect('mongodb://localhost:27017/chat_data').then(() => {
 
 const io = require('socket.io')(server, {
     cors: {
-      origin: "http://localhost:3000",  // Frontend origin
+      origin: "https://front-end-hn5g.vercel.app/",  // Frontend origin
       methods: ["GET", "POST", "PUT", "DELETE"]
     }
   });
