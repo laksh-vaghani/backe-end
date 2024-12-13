@@ -15,10 +15,10 @@ mongoose.connect('mongodb://localhost:27017/chat_data').then(() => {
 })
 
 const io = require('socket.io')(server, {
-    cors: {
-      origin: "https://front-end-hn5g.vercel.app/",  // Frontend origin
-      methods: ["GET", "POST", "PUT", "DELETE"]
-    }
+  cors: {
+  origin: ["https://front-end-hn5g.vercel.app", "http://localhost:3000"],
+  methods: ["GET", "POST", "PUT", "DELETE"]
+}
   });
   
 let connectedClients = {};
